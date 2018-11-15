@@ -1,84 +1,74 @@
 const express = require('express')
 const app = express();
 const port = process.env.PORT || 8080;
-const apiRoutes = require("./api-routes")
-const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const ObjectId = require('mongodb').ObjectId;
 const mongoUrl = 'mongodb://localhost:27017';
 const dbName = 'myApp';
-const contact = 'contact';
+const collectionName = 'contact';
 
-app.get('/', (req, res) => res.send('Hello World avec Express et Nodemon'));
+app.use(express.json());
 
-/* Liste de tous les contacts */
-app.get('/', function (req, res) {
-    MongoClient.connect(mongoUrl, { useNewUrlParser: true}, function (err, db) {
+app.get('/users', function (req, res) {
+    MongoClient.connect(mongoUrl, {
+        useNewUrlParser: true
+    }, function (err, db) {
         const dbo = db.db(dbName);
-        dbo.collection(contact).find({}).toArray(function (err, val) {
-            // res.send(val);
-            db.close();
-        });
-    });
-});
-
-// /* Récupérer un seul contact */
-app.get('/', function (req, res) {
-    const user = {
-        _id: new ObjectId("5bec28c9d8631e0dc701c665")
-    };
-    MongoClient.connect(mongoUrl, { useNewUrlParser: true}, function (err, db) {
-        const dbo = db.db(dbName);
-        dbo.collection(contact).findOne(user, function (err, val) {
+        dbo.collection(collectionName).find({}).toArray(function (err, val) {
             res.send(val);
             db.close();
         });
     });
 });
 
-// /* Créer un nouveau  contact */
-app.post('/', function (req, res) {
+app.post('/user', function (req, res) {
     const user = {
-        firstname: "prénom ok",
-        lastname: "nom ok",
-        email: "email ok"
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email
     };
-    MongoClient.connect(mongoUrl, { useNewUrlParser: true}, function (err, db) {
+    MongoClient.connect(mongoUrl, {
+        useNewUrlParser: true
+    }, function (err, db) {
         const dbo = db.db(dbName);
-        dbo.collection(contact).insertOne(user, function (err, val) {
-            // res.send(val);
+        dbo.collection(collectionName).insertOne(user, function (err, val) {
+            res.send(val);
             db.close();
         });
     });
 });
 
-/* Mettre à jour un contact unique */
-app.put('/', function (req, res) {
-    const user = { _id: new ObjectId("5bec28c9d8631e0dc701c665")};
-    const newDatas = {
+app.put('/user', function (req, res) {
+    const oldUser = {
+        _id: new ObjectId(req.body._id)
+    };
+    const newUser = {
         $set: {
-          firstname: "Bob",
-          lastname: "Toto",
-          email: "bob@toto.com"
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email
         }
     };
-    MongoClient.connect(mongoUrl, { useNewUrlParser: true}, function (err, db) {
+    MongoClient.connect(mongoUrl, {
+        useNewUrlParser: true
+    }, function (err, db) {
         const dbo = db.db(dbName);
-        dbo.collection(contact).updateOne(user, newDatas, function (err, val) {
+        dbo.collection(collectionName).updateOne(oldUser, newUser, function (err, val) {
             res.send(val);
             db.close();
         });
     });
 });
 
-/* Effacer un seul contact */
-app.delete('/', function (req, res) {
+app.delete('/user', function (req, res) {
     const user = {
-        _id: new ObjectId("5bec36be5fcdc916fb442e46")
+        _id: new ObjectId(req.body._id)
     };
-    MongoClient.connect(mongoUrl, { useNewUrlParser: true}, function (err, db) {
+    MongoClient.connect(mongoUrl, {
+        useNewUrlParser: true
+    }, function (err, db) {
         const dbo = db.db(dbName);
-        dbo.collection(contact).deleteOne(user, function (err, val) {
+        dbo.collection(collectionName).deleteOne(user, function (err, val) {
             res.send(val);
             db.close();
         });
@@ -86,6 +76,5 @@ app.delete('/', function (req, res) {
 });
 
 app.listen(port, function () {
-     console.log("Lancement de myApp sur le port " + port);
+    console.log("Lancement de myApp sur le port " + port);
 });
-app.use('/api', apiRoutes)

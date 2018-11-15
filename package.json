@@ -7,15 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index"
   },
-  "keywords": [
-    "api",
-    "restful",
-    "json"
-  ],
-  "author": "Nicolas S. Varela",
-  "license": "ISC",
+  "author": "innostarterkit",
   "dependencies": {
-    "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "mongodb": "^3.1.9"
   }
