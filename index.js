@@ -9,6 +9,29 @@ const collectionName = 'contact';
 
 app.use(express.json());
 
+app.use(function (req, res, next) {
+   res.setHeader('Access-Control-Allow-Origin', '*');
+   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+   res.setHeader('Access-Control-Allow-Credentials', true);
+   next();
+});
+
+app.get('/user', function (req, res) {
+    MongoClient.connect(mongoUrl, {
+        useNewUrlParser: true
+    }, function (err, db) {
+        const dbo = db.db(dbName);
+        const user = {
+            "_id": new ObjectId(req.query._id)
+        };
+        dbo.collection(collectionName).findOne(user, function (err, val) {
+            res.send(val);
+            db.close();
+        });
+    });
+});
+
 app.get('/users', function (req, res) {
     MongoClient.connect(mongoUrl, {
         useNewUrlParser: true
@@ -20,6 +43,7 @@ app.get('/users', function (req, res) {
         });
     });
 });
+
 
 app.post('/user', function (req, res) {
     const user = {
@@ -39,30 +63,33 @@ app.post('/user', function (req, res) {
 });
 
 app.put('/user', function (req, res) {
-    const oldUser = {
-        _id: new ObjectId(req.body._id)
-    };
-    const newUser = {
-        $set: {
-            firstname: req.body.firstname,
-            lastname: req.body.lastname,
-            email: req.body.email
-        }
-    };
     MongoClient.connect(mongoUrl, {
         useNewUrlParser: true
     }, function (err, db) {
         const dbo = db.db(dbName);
-        dbo.collection(collectionName).updateOne(oldUser, newUser, function (err, val) {
-            res.send(val);
-            db.close();
-        });
+        const user = {
+            "_id": new ObjectId(req.query._id)
+        }
+        dbo.collection(collectionName).findOneAndUpdate(
+            user,
+            { $set: 
+                {
+                    "firstname": req.body.firstname,
+                    "lastname": req.body.lastname,
+                    "email": req.body.email
+                }
+            },
+            function (err, val) {
+                res.send(val);
+                db.close();
+            }
+        );
     });
 });
 
 app.delete('/user', function (req, res) {
     const user = {
-        _id: new ObjectId(req.body._id)
+        _id: new ObjectId(req.query._id)
     };
     MongoClient.connect(mongoUrl, {
         useNewUrlParser: true
