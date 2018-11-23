@@ -44,7 +44,6 @@ app.get('/users', function (req, res) {
     });
 });
 
-
 app.post('/user', function (req, res) {
     const user = {
         firstname: req.body.firstname,
@@ -68,7 +67,7 @@ app.put('/user', function (req, res) {
     }, function (err, db) {
         const dbo = db.db(dbName);
         const user = {
-            "_id": new ObjectId(req.query._id)
+            "_id": new ObjectId(req.body._id)
         }
         dbo.collection(collectionName).findOneAndUpdate(
             user,
